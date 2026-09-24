@@ -122,6 +122,96 @@ h1 { font-size: clamp(30px, 5vw, 46px); line-height: 1.13; letter-spacing: -.02e
 .hero-kart b { display: block; font-size: 15px; color: var(--lacivert) }
 .hero-kart span { font-size: 13.5px; color: var(--sonuk) }
 
+/* ---------- klinik destesi ----------
+   Kahraman gorselindeki tek fotograf yerine uc fotograflik bir deste.
+   Arkadakiler saga ve hafif yukari kaciyor, boylece "arkada daha var"
+   hissi olusuyor. Dokununca ondeki ucup gidiyor, arkadaki one geliyor.
+
+   Neden mutlak konumlandirma: uc kart da ayni yeri kaplamali ki
+   sayfa yuksekligi kart degistikce zipla masin.                        */
+.deste {
+  position: relative; display: block; padding: 0;
+  border: 0; background: none; cursor: pointer; text-align: left;
+  /* Arkadaki kartlar saga tasiyor, onlara yer birakiyoruz.
+     Genislik yuzde 100 DEGIL: yuzde 100 + sag bosluk kapsayiciyi
+     asar ve telefonda sayfa yana kayar. calc ile bosluk dusuluyor. */
+  width: calc(100% - 64px); margin: 48px 64px 26px 0;
+  -webkit-tap-highlight-color: transparent;
+}
+.deste::after {                      /* dokunma alanini kartla ayni tut */
+  content: ""; position: absolute; inset: 0;
+}
+.deste-kart {
+  position: absolute; inset: 0; border-radius: 20px; overflow: hidden;
+  background: #fff; box-shadow: var(--golge-guclu);
+  /* Merkezden kuculsun: tabandan kuculurse kart buyudukce ust kenari
+     asagi iner ve "yukari kaciyor" izlenimi bozulur. */
+  transform-origin: 50% 50%;
+  transition: transform .52s cubic-bezier(.22,.9,.28,1),
+              opacity .42s ease, filter .52s ease;
+  will-change: transform;
+}
+.deste-kart:first-child { position: relative }   /* yuksekligi bu belirler */
+.deste-kart img { display: block; width: 100%; border-radius: 0; box-shadow: none }
+
+/* Sira 0 ondeki, 1 ve 2 arkadakiler. Her biri saga ve yukari kayiyor,
+   biraz kuculuyor ve soluyor: klasik derinlik uc lusu.                 */
+.deste-kart[data-sira="0"] { transform: none; z-index: 3 }
+.deste-kart[data-sira="1"] { transform: translate(30px, -34px) scale(.945); z-index: 2; filter: brightness(.94) }
+.deste-kart[data-sira="2"] { transform: translate(58px, -64px) scale(.89);  z-index: 1; filter: brightness(.88) }
+
+/* Ondeki kart ucup giderken: sola-yukari savrulup donuyor.             */
+.deste-kart.gidiyor {
+  transform: translate(-64px, -46px) rotate(-7deg) scale(.96);
+  opacity: 0; z-index: 4;
+}
+.deste:hover .deste-kart[data-sira="0"] { transform: translateY(-4px) }
+.deste:focus-visible { outline: 3px solid var(--mavi); outline-offset: 8px; border-radius: 22px }
+
+/* Kartin uzerindeki adres/bolum etiketi */
+.deste-etiket {
+  position: absolute; left: 14px; right: 14px; bottom: 14px;
+  background: rgba(255,255,255,.96); backdrop-filter: blur(6px);
+  border-radius: var(--r); padding: 13px 16px;
+  box-shadow: 0 6px 20px rgba(13,42,67,.14);
+  display: flex; align-items: center; gap: 12px;
+}
+.deste-etiket .simge {
+  width: 40px; height: 40px; flex: none; border-radius: 11px;
+  background: #e8f2fb; color: var(--mavi-koyu);
+  display: flex; align-items: center; justify-content: center;
+}
+.deste-etiket b { display: block; font-size: 15px; color: var(--lacivert); line-height: 1.3 }
+.deste-etiket span { display: block; font-size: 13.5px; color: var(--sonuk); line-height: 1.35 }
+
+/* Ipucu satiri: kullanici tiklanabildigini bilmeli, yoksa ozellik gorunmez */
+.deste-ipucu {
+  margin-top: 18px; display: flex; align-items: center; gap: 10px;
+  font-size: 14.5px; color: var(--sonuk);
+}
+.deste-ipucu .sayac { margin-left: auto; display: flex; gap: 6px }
+.deste-ipucu .nokta {
+  width: 7px; height: 7px; border-radius: 50%; background: var(--cizgi);
+  transition: background var(--gecis), transform var(--gecis);
+}
+.deste-ipucu .nokta.etkin { background: var(--mavi); transform: scale(1.35) }
+
+@media (max-width: 860px) {
+  .deste { width: calc(100% - 46px); margin: 34px 46px 20px 0 }
+  .deste-kart[data-sira="1"] { transform: translate(20px, -22px) scale(.95) }
+  .deste-kart[data-sira="2"] { transform: translate(40px, -44px) scale(.90) }
+  .deste-etiket { left: 10px; right: 10px; bottom: 10px; padding: 11px 13px; gap: 10px }
+  .deste-etiket .simge { width: 34px; height: 34px; border-radius: 9px }
+  .deste-etiket b { font-size: 14px }
+  .deste-etiket span { font-size: 12.5px }
+}
+
+/* Hareket azaltma aciksa kartlar birbirine gecis yapmaz, anlik degisir.
+   Ozellik calismaya devam eder, sadece animasyon olmaz.                */
+@media (prefers-reduced-motion: reduce) {
+  .deste-kart.gidiyor { opacity: 0 }
+}
+
 /* ---------- bölümler ---------- */
 section { padding: 60px 0 }
 section.dar { padding: 44px 0 }

@@ -293,3 +293,92 @@
     if (e.key === 'Escape' && panel.classList.contains('acik')) panel.querySelector('.kapat').click();
   });
 })();
+
+/* ---------- Klinik fotoğraf destesi ----------
+   Kahraman bölümündeki üç fotoğraf bir deste halinde duruyor. Desteye
+   dokununca öndeki kart savrulup gidiyor, arkadaki öne geliyor.
+
+   Neden sıra numarası ile çalışıyor: kartların DOM içindeki yeri hiç
+   değişmiyor, yalnızca data-sira değeri dönüyor. Böylece tarayıcı
+   yeniden düzen hesabı yapmıyor, animasyon telefonda da akıcı kalıyor. */
+(function () {
+  var deste = document.getElementById('klinik-destesi');
+  if (!deste) return;
+
+  var kartlar = Array.prototype.slice.call(deste.querySelectorAll('.deste-kart'));
+  if (kartlar.length < 2) return;
+
+  var noktalar = document.querySelectorAll('.deste-ipucu .nokta');
+  var duyuru = document.getElementById('deste-duyuru');
+  var onde = 0;              // şu an önde duran kartın dizideki yeri
+  var mesgul = false;        // animasyon sürerken ikinci tıklamayı yut
+
+  var sakin = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  function yerlestir() {
+    for (var i = 0; i < kartlar.length; i++) {
+      var s = (i - onde + kartlar.length) % kartlar.length;
+      kartlar[i].setAttribute('data-sira', s);
+    }
+    for (var n = 0; n < noktalar.length; n++) {
+      noktalar[n].classList.toggle('etkin', n === onde);
+    }
+    var etiket = kartlar[onde].querySelector('.deste-etiket');
+    if (duyuru && etiket) {
+      duyuru.textContent = etiket.querySelector('b').textContent + '. ' +
+                           etiket.querySelector('span').textContent;
+    }
+  }
+
+  function sonraki() {
+    if (mesgul) return;
+    mesgul = true;
+    var giden = kartlar[onde];
+
+    if (sakin) {                       // hareket azaltma açıksa doğrudan geç
+      onde = (onde + 1) % kartlar.length;
+      yerlestir();
+      mesgul = false;
+      return;
+    }
+
+    giden.classList.add('gidiyor');
+    onde = (onde + 1) % kartlar.length;
+
+    // Öndeki uçarken arkadakiler bir basamak ilerlesin: aynı anda olursa
+    // göz "yer değiştirdiler" diye okuyor, arka arkaya olursa "sıra geldi".
+    window.setTimeout(function () {
+      for (var i = 0; i < kartlar.length; i++) {
+        if (kartlar[i] === giden) continue;
+        var s = (i - onde + kartlar.length) % kartlar.length;
+        kartlar[i].setAttribute('data-sira', s);
+      }
+      for (var n = 0; n < noktalar.length; n++) {
+        noktalar[n].classList.toggle('etkin', n === onde);
+      }
+      var etiket = kartlar[onde].querySelector('.deste-etiket');
+      if (duyuru && etiket) {
+        duyuru.textContent = etiket.querySelector('b').textContent + '. ' +
+                             etiket.querySelector('span').textContent;
+      }
+    }, 90);
+
+    // Uçan kart arkaya, en sona yerleşsin. Geçişi kapatıp yerleştiriyoruz
+    // ki geri dönerken ekranın ortasından süzülüyor gibi görünmesin.
+    window.setTimeout(function () {
+      giden.style.transition = 'none';
+      giden.classList.remove('gidiyor');
+      giden.setAttribute('data-sira', String(kartlar.length - 1));
+      void giden.offsetWidth;                 // tarayıcıyı zorla hesaplat
+      giden.style.transition = '';
+      mesgul = false;
+    }, 540);
+  }
+
+  deste.addEventListener('click', sonraki);
+  deste.addEventListener('keydown', function (e) {
+    if (e.key === 'ArrowRight' || e.key === 'ArrowDown') { e.preventDefault(); sonraki(); }
+  });
+
+  yerlestir();
+})();
