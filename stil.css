@@ -151,6 +151,7 @@ h1 { font-size: clamp(30px, 5vw, 46px); line-height: 1.13; letter-spacing: -.02e
               opacity .42s ease, filter .52s ease;
   will-change: transform;
 }
+.deste-kart { opacity: 1 }
 .deste-kart:first-child { position: relative }   /* yuksekligi bu belirler */
 .deste-kart img { display: block; width: 100%; border-radius: 0; box-shadow: none }
 
@@ -160,12 +161,28 @@ h1 { font-size: clamp(30px, 5vw, 46px); line-height: 1.13; letter-spacing: -.02e
 .deste-kart[data-sira="1"] { transform: translate(30px, -34px) scale(.945); z-index: 2; filter: brightness(.94) }
 .deste-kart[data-sira="2"] { transform: translate(58px, -64px) scale(.89);  z-index: 1; filter: brightness(.88) }
 
-/* Ondeki kart ucup giderken: sola-yukari savrulup donuyor.             */
+/* Ondeki kart giderken: yukari dogru suzulup soluyor. Savrulma degil,
+   hafif bir yukselme; goz "kalkti gitti" diye okuyor.                  */
 .deste-kart.gidiyor {
-  transform: translate(-64px, -46px) rotate(-7deg) scale(.96);
+  transform: translate(-12px, -68px) rotate(-2.5deg) scale(.985);
   opacity: 0; z-index: 4;
+  transition: transform .58s cubic-bezier(.32,.04,.35,1),
+              opacity .46s ease .04s;
 }
-.deste:hover .deste-kart[data-sira="0"] { transform: translateY(-4px) }
+
+/* Giden kart arkaya donerken: dogrudan yerine yapismasin. Once destenin
+   biraz otesine, gorunmez halde konuyor; sinif kaldirilinca oradan
+   yerine suzuluyor. Sert giris boylece yumusak bir gelise donuyor.
+   Bu kural data-sira kurallarindan SONRA gelmeli, ayni agirliktalar.   */
+.deste-kart.donuyor {
+  transition: none;
+  opacity: 0;
+  transform: translate(96px, -104px) scale(.80);
+}
+/* Fare uzerindeyken ondeki kart bir tik kalkar. :not(.gidiyor) sart:
+   olmazsa bu kural ucma animasyonunu ezer ve kart yukari kaymadan
+   oldugu yerde silinir. */
+.deste:hover .deste-kart[data-sira="0"]:not(.gidiyor) { transform: translateY(-4px) }
 .deste:focus-visible { outline: 3px solid var(--mavi); outline-offset: 8px; border-radius: 22px }
 
 /* Kartin uzerindeki adres/bolum etiketi */

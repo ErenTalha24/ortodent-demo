@@ -363,16 +363,18 @@
       }
     }, 90);
 
-    // Uçan kart arkaya, en sona yerleşsin. Geçişi kapatıp yerleştiriyoruz
-    // ki geri dönerken ekranın ortasından süzülüyor gibi görünmesin.
+    // Uçan kart arkaya dönsün. İki adım: önce görünmez halde destenin
+    // biraz ötesine konuyor (donuyor sınıfı), sonra sınıf kaldırılınca
+    // oradan yerine süzülüyor. Tek adımda yapsaydık kart bir anda
+    // arkada beliriyordu, göze sert geliyordu.
     window.setTimeout(function () {
-      giden.style.transition = 'none';
+      giden.classList.add('donuyor');
       giden.classList.remove('gidiyor');
       giden.setAttribute('data-sira', String(kartlar.length - 1));
-      void giden.offsetWidth;                 // tarayıcıyı zorla hesaplat
-      giden.style.transition = '';
+      void giden.offsetWidth;                 // başlangıç halini tarayıcıya işlet
+      giden.classList.remove('donuyor');      // buradan itibaren yumuşak geçiş
       mesgul = false;
-    }, 540);
+    }, 500);
   }
 
   deste.addEventListener('click', sonraki);
